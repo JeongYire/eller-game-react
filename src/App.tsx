@@ -4,8 +4,11 @@ import { CommonContext } from './context/CommonContext';
 import { BoxFamily, BoxInteraction, BoxType, Collision } from './types/types';
 import Styles from './styles/styles.module.css';
 
+
+
 // 0 혹은 1을 리턴합니다
 const RandomCheck = () => Boolean(Math.round(Math.random()));
+
 
 function App() {
 
