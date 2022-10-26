@@ -14,11 +14,55 @@ export default forwardRef((props : { col : number, row : number, collision : num
     const [here,SetHere] = useState(false);
     const isClear = here && props.isFinal;
 
+    if(here && !isClear){
+        window.onkeydown = (e) => {
+            const key = e.key.toUpperCase();
+            if(!(collision & Collision.Up)){
+                if(key == 'W' || key == 'ARROWUP'){
+                    props.Move(props.col,props.row - 1);
+                }
+            }
+            if(!(collision & Collision.Down)){
+                if(key == 'S' || key == 'ARROWDOWN'){
+                    props.Move(props.col,props.row + 1);
+                }
+            }
+            if(!(collision & Collision.Left)){
+                if(e.key == 'A' || key == 'ARROWLEFT'){
+                    props.Move(props.col - 1,props.row);
+                }
+            }
+            if(!(collision & Collision.Right)){
+                if(e.key == 'D'  || key == 'ARROWRIGHT'){
+                    props.Move(props.col + 1,props.row );
+                }
+            }
+        }
+    }
+
     useEffect(() => {
         if(here && props.isFinal){
             console.log('클리어!');
             props.Clear();
         }
+
+        
+ 
+        window.addEventListener('keydown',(event : KeyboardEvent) => {
+            if(event.key == 'W'){
+				
+			}
+            if(event.key == 'W'){
+				
+			}
+            if(event.key == 'W'){
+				
+			}
+            if(event.key == 'W'){
+				
+			}
+        })
+
     },[here])
 
     useImperativeHandle(ref,() => ({
