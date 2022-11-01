@@ -5,7 +5,7 @@ import { BoxInteraction, Collision, CommonContextType } from './types/types';
 
 
 
-export default forwardRef((props : { col : number, row : number, collision : number, isFinal : boolean, Move : (col : number,row : number) => void, Clear : () => void },ref : Ref<BoxInteraction>) => {
+export default forwardRef((props : { theme : 'white' | 'black',col : number, row : number, collision : number, isFinal : boolean, Move : (col : number,row : number) => void, Clear : () => void },ref : Ref<BoxInteraction>) => {
 
  
     const collision = props.collision;
@@ -41,7 +41,7 @@ export default forwardRef((props : { col : number, row : number, collision : num
     }
 
     useEffect(() => {
-        
+
         if(here && props.isFinal){
             console.log('클리어!');
             props.Clear();
@@ -64,7 +64,7 @@ export default forwardRef((props : { col : number, row : number, collision : num
         ,borderBottom : collision & Collision.Down ? '1px solid black' : 'none'
         ,borderLeft : collision & Collision.Left ? '1px solid black' : 'none'
         ,borderRight : collision & Collision.Right ? '1px solid black' : 'none'
-        ,backgroundColor : props.isFinal && !explorer ? 'orange' : explorer ? 'white' : 'black'
+        ,backgroundColor : props.isFinal && !explorer ? 'orange' : explorer ? 'white' : props.theme == 'black' ? 'black' : 'white'
     } 
 
     return (

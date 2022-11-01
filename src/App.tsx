@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import Box from './Box';
 import { CommonContext } from './context/CommonContext';
 import { BoxFamily, BoxInteraction, BoxType, Collision } from './types/types';
@@ -491,26 +491,43 @@ function App() {
     SetClear(true);
   }
 
+  const [theme,SetTheme] = useState<'white' | 'black'>('black'); 
+
+
   return (
-    <div id={Styles.boxContainer} style={{width: context.MAX_COLUMN * context.BOX_WIDTH,height : context.MAX_ROW * context.BOX_WIDTH}}>
-      {
-        boxGroup.map((obj) => {
-          return <Box Clear={ClearAction} Move={MoveAction} key={obj.no} col={obj.col} row={obj.row} collision={obj.collision} isFinal={obj.isFinal} ref={refOjbect => (boxHandler.current[obj.no] = refOjbect as BoxInteraction)}/>
-        })
-      }
-      {
-        !ready && 
-        <div id={Styles.readyBox}>
-            <button onClick={readyAction}>시작</button>
-        </div> 
-      }
-      {
-        clear && 
-        <div id={Styles.clearBox}>
-            <p>클리어 하셨습니다!</p>
-        </div> 
-      }
-    </div>
+    <React.Fragment>
+      <div id={Styles.boxContainer} style={{width: context.MAX_COLUMN * context.BOX_WIDTH,height : context.MAX_ROW * context.BOX_WIDTH}}>
+        {
+          boxGroup.map((obj) => {
+            return <Box theme={theme} Clear={ClearAction} Move={MoveAction} key={obj.no} col={obj.col} row={obj.row} collision={obj.collision} isFinal={obj.isFinal} ref={refOjbect => (boxHandler.current[obj.no] = refOjbect as BoxInteraction)}/>
+          })
+        }
+        {
+          !ready && 
+          <div id={Styles.readyBox}>
+              <button onClick={readyAction}>시작</button>
+          </div> 
+        }
+        {
+          clear && 
+          <div id={Styles.clearBox}>
+              <p>클리어 하셨습니다!</p>
+          </div> 
+        }
+      </div>
+      <div>
+        {
+          ready && 
+          theme == 'black' && 
+          <button onClick={() => {SetTheme('white')}}>흰색 모드</button>
+        }
+        {
+          ready && 
+          theme == 'white' && 
+          <button onClick={() => {SetTheme('black')}}>검정 모드</button>
+        }
+      </div>
+    </React.Fragment>
   );
 }
 
