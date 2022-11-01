@@ -41,27 +41,11 @@ export default forwardRef((props : { col : number, row : number, collision : num
     }
 
     useEffect(() => {
+        
         if(here && props.isFinal){
             console.log('클리어!');
             props.Clear();
         }
-
-        
- 
-        window.addEventListener('keydown',(event : KeyboardEvent) => {
-            if(event.key == 'W'){
-				
-			}
-            if(event.key == 'W'){
-				
-			}
-            if(event.key == 'W'){
-				
-			}
-            if(event.key == 'W'){
-				
-			}
-        })
 
     },[here])
 

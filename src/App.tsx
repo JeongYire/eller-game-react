@@ -49,6 +49,13 @@ function App() {
         isFinal : false,
         getCollision : () => getCollision(boxType),
       } 
+
+      
+      boxType.family = {
+        no : boxType.no,
+        members : [boxType]
+      }
+      
   
       array.push(boxType);
   
@@ -66,7 +73,8 @@ function App() {
   const [clear,SetClear] = useState(false);
   const moveObject = useRef<BoxType>();
   
-
+ // 원본
+ /*
   const readyAction = () => {
 
     const currentBoxGroup = boxGroup;
@@ -194,6 +202,255 @@ function App() {
 
     
       
+      familyGroup = [];
+      row++;
+      
+    }
+
+    
+    MoveAction(0,0);
+    SetBoxGroup(currentBoxGroup);
+    SetReady(!ready);
+  }
+  */
+
+  //수정중
+  const readyAction = () => {
+
+    const currentBoxGroup = boxGroup;
+
+    // 같은 행의 배열을 담는 배열입니다.
+    let familyGroup : BoxFamily[]= new Array();
+
+    let row = 0;
+
+    //
+    const RemoveFamily = (a : BoxFamily) => {
+      const idx = familyGroup.findIndex( obj => obj.no == a.no );
+      if(idx > -1){
+        familyGroup.splice(idx,1);
+      }
+    }
+
+    // 왼쪽에서 오른쪽을 뚫습니다. 만약 같은 배열일경우 false를 반환합니다. 
+    // 성공적으로 뚫고나면 같은 배열에 넣습니다.
+    const LeftToRight = (a : BoxType) : boolean => {
+
+      const siblingColumn = currentBoxGroup[a.no + 1];
+
+      if(siblingColumn.family?.no == a.family?.no){
+        return false;
+      }
+
+      let targetFamily = a.family as BoxFamily;
+      RemoveFamily(targetFamily);
+      let siblingFamily = siblingColumn.family as BoxFamily;
+      RemoveFamily(siblingFamily);
+  
+      const concatMembers : BoxType[] = targetFamily?.members.concat(siblingFamily?.members as []) as BoxType[];
+      const concatFamily : BoxFamily = {
+        no : a.family?.no as number,
+        members : concatMembers
+      }
+
+      a.collision -= Collision.Right;
+      siblingColumn.collision -= Collision.Left;
+
+      concatFamily.members.map(obj => {
+        obj.family = concatFamily;
+        currentBoxGroup[obj.no] = obj;
+      })
+
+      familyGroup.push(concatFamily);
+
+      return true;
+    }
+
+    // 오른쪽에서 왼쪽을 뚫습니다. 만약 같은 배열일경우 false를 반환합니다. 
+    // 성공적으로 뚫고나면 같은 배열에 넣습니다.
+    const RightToLeft = (a : BoxType) : boolean  => {
+      const siblingColumn = currentBoxGroup[a.no - 1];
+
+      if(siblingColumn.family?.no == a.family?.no){
+        return false;
+      }
+
+      let targetFamily = a.family as BoxFamily;
+      RemoveFamily(targetFamily);
+      let siblingFamily = siblingColumn.family as BoxFamily;
+      RemoveFamily(siblingFamily);
+
+      const concatMembers : BoxType[] = targetFamily?.members.concat(siblingFamily?.members as []) as BoxType[];
+      const concatFamily : BoxFamily = {
+        no : siblingColumn.family?.no as number,
+        members : concatMembers
+      }
+
+      a.collision -= Collision.Left;
+      siblingColumn.collision -= Collision.Right;
+
+      concatFamily.members.map(obj => {
+        obj.family = concatFamily;
+        currentBoxGroup[obj.no] = obj;
+      })
+
+      familyGroup.push(concatFamily);
+ 
+      return true;
+    }
+
+    while(true){
+
+      if(row == context.MAX_ROW){
+        break;
+      }
+
+      if(row != context.MAX_ROW-1){
+
+        for(let col = 0; col < context.MAX_COLUMN; col++){
+
+          const column = currentBoxGroup[col + (row * context.MAX_COLUMN)];
+          const family = column.family as BoxFamily;
+
+          // 우선 배열을 넣어 초기화합니다...
+          // familyGroup 에 없다면 추가합니다 
+          if(familyGroup.findIndex(obj => obj.no == family.no) == -1){
+            familyGroup.push(family);
+          }
+         
+          if(column.col == 0){
+            if(RandomCheck()){
+              LeftToRight(column);
+            }
+            continue;
+          }
+
+          if(column.col+1 == context.MAX_COLUMN){
+            if(RandomCheck()){
+              RightToLeft(column);
+            }
+            continue;
+          }
+
+
+          if(RandomCheck()){
+            LeftToRight(column);
+          } 
+          
+          if(RandomCheck()){
+            RightToLeft(column);
+          }
+          
+        }
+
+        let idx = 0;
+        const familyLength = familyGroup.length;
+        
+        // 합친후, 같이 연결된 가족중 최소 1개 이상의 구멍을 냅니다
+        while(true){
+
+          if(idx == familyLength){
+            break;
+          }
+
+          let family = familyGroup[idx];
+          let check = false;
+
+          // 인접한 벽이 같은 배열이면 안되므로, 같은 배열인지 체크하기위해 빈 배열을 선언합니다
+          const targetFamily : BoxFamily = {
+            no : -1,
+            members : [],
+          }
+
+          while(true){
+
+            family.members.map((obj,idx) => {
+
+              if(idx == 0){
+                targetFamily.no = obj.no;
+              }
+    
+              if(RandomCheck()){
+                
+                const siblingColumn = currentBoxGroup[obj.no + context.MAX_COLUMN]; 
+                
+                obj.collision -= Collision.Down;
+                siblingColumn.collision -= Collision.Up;
+
+                currentBoxGroup[obj.no] = obj;
+                currentBoxGroup[siblingColumn.no] = siblingColumn;
+
+                targetFamily.members.push(siblingColumn);
+                siblingColumn.family = targetFamily;
+             
+                check = true;
+
+              }
+                
+            });
+
+            if(check){
+              break;
+            }
+
+          }
+
+          idx++;
+        }
+        
+       
+        
+       
+      }else{
+        // 마지막 작업
+      
+        for(let col = 0; col < context.MAX_COLUMN; col++){
+          const column = currentBoxGroup[col + (row * context.MAX_COLUMN)];
+
+          if(column.col == 0){
+            LeftToRight(column);
+            continue;
+          }
+
+          if(column.col == context.MAX_COLUMN-1){
+            RightToLeft(column);
+            continue;
+          }
+
+          LeftToRight(column);
+          RightToLeft(column);
+
+        }
+
+        // 도착점을 만듭니다.
+        // row가 높으면서 충돌지점이 많은 ( 벽이 많은 ) 컬럼을 고릅니다.
+        let base = 3;
+        
+        while(true){
+          const columns = currentBoxGroup.filter( obj => obj.getCollision() > base);
+          if(columns.length < 1){
+            base -= 1;
+            continue;
+          }
+          const maxRow = columns.map(obj => obj.row).reduce( (a,b) => {
+            return a > b ? a : b;
+          });
+          const sameRowColumns = columns.filter( obj => obj.row == maxRow );
+
+          const finalColumn = sameRowColumns.reduce( (a,b) => {
+            return a.col > b.col ? a : b;
+          });
+
+          finalColumn.isFinal = true;
+          currentBoxGroup[finalColumn.no] = finalColumn;
+
+          break;
+        }
+       
+
+      }
+
+
       familyGroup = [];
       row++;
       
